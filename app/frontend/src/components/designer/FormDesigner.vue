@@ -711,6 +711,7 @@ export default {
               icon
               size="x-small"
               v-bind="props"
+              :title="$t('trans.formDesigner.exportDesign')"
               @click="onExportClick"
             >
               <v-icon icon="mdi:mdi-download"></v-icon>
@@ -726,6 +727,7 @@ export default {
               icon
               size="x-small"
               v-bind="props"
+              :title="$t('trans.formDesigner.importDesign')"
               @click="$refs.uploader.click()"
             >
               <v-icon icon="mdi:mdi-publish"></v-icon>
