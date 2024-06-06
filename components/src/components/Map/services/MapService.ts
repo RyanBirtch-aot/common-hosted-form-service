@@ -1,3 +1,4 @@
+// services/MapService.ts
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import 'leaflet/dist/leaflet.css';
@@ -22,17 +23,14 @@ export default function MapService(options: MapServiceOptions): void {
   if (mapContainer) {
     const { map, drawnItems } = initializeMap(options);
 
-    //event listener for drawn objects
+    // Event listener for drawn objects
     map.on('draw:created', function (e) {
-      //console.log(e)
       let type = e.type;
       let layer = e.layer;
       drawnItems.addLayer(layer);
-      drawnItems.eachLayer((l) => {
-        console.log(l);
-      });
       updateComponentValue();
     });
+
     const updateComponentValue = () => {
       const markers = [];
       drawnItems.eachLayer((layer) => {
@@ -80,17 +78,19 @@ const initializeMap = (options: MapServiceOptions) => {
     map.scrollWheelZoom.disable();
   }
 
-  //Initialize Draw Layer
+  // Initialize Draw Layer
   let drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
-  //Add Drawing Controllers
+
+  // Add Drawing Controllers
   let drawControl = new L.Control.Draw({
     draw: drawOptions,
     edit: {
       featureGroup: drawnItems,
     },
   });
-  //Attach Controls to map
+
+  // Attach Controls to map
   map.addControl(drawControl);
   return { map, drawnItems };
 };

@@ -7,6 +7,10 @@ const FieldComponent = (Components as any).components.field;
 const CENTER: [number, number] = [48.41939025932759, -123.37029576301576];
 
 export default class Component extends (FieldComponent as any) {
+  map: any;
+  drawnItems: any;
+  componentID: string;
+
   static schema(...extend: any[]) {
     return FieldComponent.schema({
       type: 'map',
@@ -27,15 +31,15 @@ export default class Component extends (FieldComponent as any) {
     };
   }
 
-  componentID = super.elementInfo().component.id;
+  constructor(component, options, data) {
+    super(component, options, data);
+    this.componentID = `map-${this.id}`;
+  }
+
   render() {
-    console.log(super.data);
-    return super.render(
-      `
-        <div id="map-${this.componentID}" style="height:400px; z-index:1;"></div>
-        
-        `
-    );
+    return super.render(`
+      <div id="${this.componentID}" style="height:400px; z-index:1;"></div>
+    `);
   }
 
   attach(element: HTMLElement) {
@@ -43,8 +47,9 @@ export default class Component extends (FieldComponent as any) {
     this.loadMap();
     return superAttach;
   }
+
   loadMap() {
-    const mapContainer = document.getElementById(`map-${this.componentID}`);
+    const mapContainer = document.getElementById(this.componentID);
     const form = document.getElementsByClassName('formio');
     const value = this.getValue(); // Get the initial value if set
     const drawOptions = {
@@ -64,6 +69,7 @@ export default class Component extends (FieldComponent as any) {
   }
 
   getValue() {
+    console.log('this.dataValuie,', this, 'dsdsd', this.dataValue);
     return this.dataValue || { markers: [] }; // Default to empty markers array if no value is set
   }
 
@@ -74,15 +80,14 @@ export default class Component extends (FieldComponent as any) {
     this.dataValue = value;
     if (this.map) {
       // If the map is already initialized, update the marker positions
-      const drawnItems = this.map.drawnItems;
-      drawnItems.clearLayers();
+      this.drawnItems.clearLayers();
       value.markers.forEach((markerData) => {
         const marker = L.marker([markerData.lat, markerData.lng], {
           draggable: true,
         }).addTo(this.map);
-        drawnItems.addLayer(marker);
+        this.drawnItems.addLayer(marker);
         marker.on('dragend', () => {
-          this.updateComponentValue(drawnItems);
+          this.updateComponentValue(this.drawnItems);
         });
       });
     }
