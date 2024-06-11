@@ -447,6 +447,18 @@ describe('_findFileIds', () => {
 });
 
 describe('listFormSubmissions', () => {
+  describe('400 response when', () => {
+    test('sort by column not in select', async () => {
+      await expect(
+        service.listFormSubmissions(formId, {
+          sortBy: {
+            column: 'x',
+          },
+        })
+      ).rejects.toThrow('400');
+    });
+  });
+
   it('should not error if fields has a trailing commma', async () => {
     await service.listFormSubmissions(formId, { fields: 'x,' });
 
@@ -695,10 +707,10 @@ describe('readEmailTemplate', () => {
 
     const template = await service.readEmailTemplate(emailTemplate.formId, emailTemplate.type);
 
-    expect(MockModel.query).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledTimes(2);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterFormId', emailTemplate.formId);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterType', emailTemplate.type);
+    expect(MockModel.query).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledTimes(2);
+    expect(MockModel.modify).toBeCalledWith('filterFormId', emailTemplate.formId);
+    expect(MockModel.modify).toBeCalledWith('filterType', emailTemplate.type);
     expect(template).toEqual(emailTemplate);
   });
 
@@ -708,10 +720,10 @@ describe('readEmailTemplate', () => {
 
     const template = await service.readEmailTemplate(emailTemplate.formId, emailTemplate.type);
 
-    expect(MockModel.query).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledTimes(2);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterFormId', emailTemplate.formId);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterType', emailTemplate.type);
+    expect(MockModel.query).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledTimes(2);
+    expect(MockModel.modify).toBeCalledWith('filterFormId', emailTemplate.formId);
+    expect(MockModel.modify).toBeCalledWith('filterType', emailTemplate.type);
     expect(template).toEqual(emailTemplateSubmissionConfirmation);
   });
 });
@@ -723,9 +735,9 @@ describe('readEmailTemplates', () => {
 
     const template = await service.readEmailTemplates(emailTemplate.formId);
 
-    expect(MockModel.query).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterFormId', emailTemplate.formId);
+    expect(MockModel.query).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledWith('filterFormId', emailTemplate.formId);
     expect(template).toEqual([emailTemplate]);
   });
 
@@ -735,9 +747,9 @@ describe('readEmailTemplates', () => {
 
     const template = await service.readEmailTemplates(emailTemplate.formId);
 
-    expect(MockModel.query).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledTimes(1);
-    expect(MockModel.modify).toHaveBeenCalledWith('filterFormId', emailTemplate.formId);
+    expect(MockModel.query).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledTimes(1);
+    expect(MockModel.modify).toBeCalledWith('filterFormId', emailTemplate.formId);
     expect(template).toEqual([emailTemplateSubmissionConfirmation]);
   });
 });
@@ -751,13 +763,13 @@ describe('createOrUpdateEmailTemplates', () => {
 
     await service.createOrUpdateEmailTemplate(emailTemplate.formId, emailTemplate, user);
 
-    expect(MockModel.insert).toHaveBeenCalledTimes(1);
-    expect(MockModel.insert).toHaveBeenCalledWith({
+    expect(MockModel.insert).toBeCalledTimes(1);
+    expect(MockModel.insert).toBeCalledWith({
       createdBy: user.usernameIdp,
       id: expect.any(String),
       ...emailTemplate,
     });
-    expect(MockTransaction.commit).toHaveBeenCalledTimes(1);
+    expect(MockTransaction.commit).toBeCalledTimes(1);
   });
 
   it('should update template when it already exists', async () => {
@@ -767,12 +779,12 @@ describe('createOrUpdateEmailTemplates', () => {
 
     await service.createOrUpdateEmailTemplate(emailTemplate.formId, emailTemplate, user);
 
-    expect(MockModel.update).toHaveBeenCalledTimes(1);
-    expect(MockModel.update).toHaveBeenCalledWith({
+    expect(MockModel.update).toBeCalledTimes(1);
+    expect(MockModel.update).toBeCalledWith({
       updatedBy: user.usernameIdp,
       ...emailTemplate,
     });
-    expect(MockTransaction.commit).toHaveBeenCalledTimes(1);
+    expect(MockTransaction.commit).toBeCalledTimes(1);
   });
 
   it('should not rollback when an error occurs outside transaction', async () => {
@@ -780,7 +792,7 @@ describe('createOrUpdateEmailTemplates', () => {
 
     await expect(service.createOrUpdateEmailTemplate(emailTemplate.formId, emailTemplate, user)).rejects.toThrow();
 
-    expect(MockTransaction.rollback).toHaveBeenCalledTimes(0);
+    expect(MockTransaction.rollback).toBeCalledTimes(0);
   });
 
   it('should rollback when an insert error occurs inside transaction', async () => {
@@ -790,7 +802,7 @@ describe('createOrUpdateEmailTemplates', () => {
 
     await expect(service.createOrUpdateEmailTemplate(emailTemplate.formId, emailTemplate, user)).rejects.toThrow();
 
-    expect(MockTransaction.rollback).toHaveBeenCalledTimes(1);
+    expect(MockTransaction.rollback).toBeCalledTimes(1);
   });
 
   it('should rollback when an update error occurs inside transaction', async () => {
@@ -801,6 +813,6 @@ describe('createOrUpdateEmailTemplates', () => {
 
     await expect(service.createOrUpdateEmailTemplate(emailTemplate.formId, emailTemplate, user)).rejects.toThrow();
 
-    expect(MockTransaction.rollback).toHaveBeenCalledTimes(1);
+    expect(MockTransaction.rollback).toBeCalledTimes(1);
   });
 });
