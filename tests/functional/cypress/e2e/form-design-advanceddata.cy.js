@@ -87,8 +87,22 @@ it('Checks the Container component', () => {
       "key": "dataGrid",
       "type": "datagrid",
       "input": true,
-
+      "components": [
+          {
+            "label": "Children",
+            "key": "children",
+            "type": "datagrid",
+            "input": true,
+            
+          
             "components": [
+              {
+                "label": "First Name",
+                "key": "firstName",
+                "type": "textfield",
+                "input": true,
+                "tableView": true
+              },
               {
               "label": "Gender",
               "key": "gender",
@@ -109,7 +123,10 @@ it('Checks the Container component', () => {
                
               } 
             ]
-    })
+        }
+     ]
+       
+})
       
     cy.get('div.ace_content').type(pretty,{ parseSpecialCharSequences: false });
     cy.get('button').contains('Save').click();
