@@ -94,7 +94,6 @@ export default class Component extends (FieldComponent as any) {
       myLocation,
       bcGeocoder,
     } = this.component;
-    const { required } = this.component.validate;
 
     const { readOnly: viewMode } = this.options;
 
@@ -182,6 +181,10 @@ export default class Component extends (FieldComponent as any) {
   }
 
   isEmpty(value) {
+    if (!this.component.allowSubmissions) return false;
+    // If the map is supposed to be read-only, just override the required flag.
+    // This is to ensure if the map designer doesn't set the number of features
+    // to be exactly equal to the number of default features the form would not submit.
     return (
       value?.features.length === 0 ||
       value?.features.length === this.defaultValue?.features.length

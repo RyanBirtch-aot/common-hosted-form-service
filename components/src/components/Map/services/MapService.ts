@@ -83,7 +83,6 @@ class MapService {
         });
         options.onDrawnItemsChange(drawnItems.getLayers());
       });
-
       map.on(L.Draw.Event.EDITSTOP, (e) => {
         options.onDrawnItemsChange(drawnItems.getLayers());
       });
@@ -285,10 +284,13 @@ class MapService {
     return false;
   }
   isDefaultFeature(feature): boolean {
-    const defaults = this.options.defaultValue.features;
-    if (defaults.length === 0) {
+    if (
+      this.options.defaultValue?.features.length === 0 ||
+      this.options.defaultValue === null
+    ) {
       return false;
     }
+    const defaults = this.options.defaultValue.features;
     const featureType = this.getFeatureType(feature);
     const sameTypes = defaults.filter((d) => {
       return d.type === featureType;
