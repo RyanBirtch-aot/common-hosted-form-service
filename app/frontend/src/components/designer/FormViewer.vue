@@ -17,7 +17,7 @@ import BaseDialog from '~/components/base/BaseDialog.vue';
 import FormViewerActions from '~/components/designer/FormViewerActions.vue';
 import FormViewerMultiUpload from '~/components/designer/FormViewerMultiUpload.vue';
 import templateExtensions from '~/plugins/templateExtensions';
-import { fileService, formService, rbacService } from '~/services';
+import { fileService, formService, rbacService, userService } from '~/services';
 import { useAppStore } from '~/store/app';
 import { useAuthStore } from '~/store/auth';
 import { useFormStore } from '~/store/form';
@@ -108,6 +108,7 @@ const submissionRecord = ref({});
 const version = ref(0);
 const versionIdToSubmitTo = ref(properties.versionId);
 const isAuthorized = ref(true);
+const submitterInfo = ref(null);
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -167,7 +168,8 @@ const viewerOptions = computed(() => {
     },
     evalContext: {
       token: tokenParsed.value,
-      user: user.value,
+      //for a form in review, we need to supply the submitter's user data instead of the current user
+      user: properties.readOnly ? submitterInfo.value ?? {} : user.value,
     },
   };
 });
@@ -181,6 +183,19 @@ const canSaveDraft = computed(
 watch(locale, () => {
   reRenderFormIo.value += 1;
 });
+
+watch(
+  [() => submissionRecord.value?.createdBy, () => properties.readOnly],
+  async ([createdBy, readOnly]) => {
+    if (createdBy && readOnly) {
+      // If the form is in a read-only state, search for and supply submitter info for the form
+      submitterInfo.value = await getSubmitterInfo();
+      // Re-render the read-only submission
+      reRenderFormIo.value += 1;
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(async () => {
   // load up headers for any External API calls
@@ -290,6 +305,7 @@ async function getFormData() {
         ? false
         : true;
     form.value = response.data.form;
+    console.log('isReadOnly? ' + properties.readOnly);
     // Schedule status is already processed by backend (checkIsFormExpired)
     // Set flags directly from the form schedule data
     if (form.value.schedule && form.value.schedule.expire !== undefined) {
@@ -353,6 +369,21 @@ async function setProxyHeaders() {
   } catch (error) {
     // need error handling
   }
+}
+
+//retrieve the submitter's info
+async function getSubmitterInfo() {
+  const createdBy = submissionRecord.value?.createdBy;
+  if (!createdBy) return {};
+  const at = createdBy.indexOf('@');
+  if (at === -1) return {};
+  // By default the only submitter information in the submission data is the createdBy property
+  // The format of this is "Username"@"IdentityProvider"
+  const username = createdBy.slice(0, at);
+  const idpCode = createdBy.slice(at + 1);
+
+  const response = await userService.getUsers({ username, idpCode });
+  return response.data?.[0] ?? {};
 }
 
 // Get the form definition/schema
