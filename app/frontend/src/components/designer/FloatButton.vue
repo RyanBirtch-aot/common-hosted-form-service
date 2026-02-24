@@ -107,8 +107,6 @@ const SAVE_TEXT = computed(() => {
 });
 
 const PREVIEW_TOOLTIP = computed(() => {
-  console.log(properties.isFormSaved);
-  console.log(canPreview);
   if (canPreview.value && !properties.isFormSaved) {
     return 'Save to preview updated form version';
   } else {
