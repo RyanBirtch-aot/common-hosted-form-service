@@ -107,10 +107,12 @@ const SAVE_TEXT = computed(() => {
 });
 
 const PREVIEW_TOOLTIP = computed(() => {
-  if (properties.canPreview) {
+  console.log(properties.isFormSaved);
+  console.log(canPreview);
+  if (canPreview.value && !properties.isFormSaved) {
     return 'Save to preview updated form version';
   } else {
-    return 'Save Draft to preview form';
+    return 'Click to Preview Form';
   }
 });
 
@@ -426,7 +428,7 @@ defineExpose({
               <!-- Preview Button -->
 
               <v-list-item>
-                <v-tooltip location="top" :text="{ PREVIEW_TOOLTIP }">
+                <v-tooltip location="top" :text="PREVIEW_TOOLTIP">
                   <template #activator="{ props }">
                     <div v-bind="props">
                       <div
